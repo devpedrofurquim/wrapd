@@ -1,16 +1,39 @@
-# wrapd
+Wrapd
+=====
 
-A new Flutter project.
+Your GitHub year — beautifully wrapped.
 
-## Getting Started
+Wrapd is a mobile app built with Flutter, showcasing your GitHub contributions in a visual summary. Think of it as your GitHub "Spotify Wrapped".
 
-This project is a starting point for a Flutter application.
+Tech Stack
+----------
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter + Dart (Material 3)
+- Clean Architecture (data, domain, presentation layers)
+- BLoC for state management
+- GoRouter for navigation
+- GetIt for dependency injection
+- App Links for OAuth callback handling
+- GitHub OAuth (in progress)
+- In-App Purchases (planned)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Folder Structure
+----------------
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+lib/
+├── app/              # Root app widget, router, theme
+├── core/             # Shared base classes, utils
+├── features/
+│   ├── auth/         # GitHub login feature
+│   ├── summary/      # Main summary screen (after login)
+│   └── ...           # Future features (e.g., premium)
+├── l10n/             # Localization
+├── gen/              # Generated files (intl, freezed)
+└── main.dart         # Entry point
+
+Made with love by Pedro Furquim
+
+License
+-------
+
+MIT — see LICENSE.md for details.
