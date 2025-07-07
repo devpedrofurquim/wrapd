@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:wrapd/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:wrapd/features/auth/presentation/bloc/auth_event.dart';
-import 'package:wrapd/features/auth/presentation/bloc/auth_state.dart';
+import 'package:wrapd/core/session/presentation/bloc/session_bloc.dart';
+import 'package:wrapd/core/session/presentation/bloc/session_state.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -16,14 +15,8 @@ class _SplashPageState extends State<SplashPage> {
   bool _navigated = false;
 
   @override
-  void initState() {
-    super.initState();
-    context.read<AuthBloc>().add(AuthStarted());
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
+    return BlocListener<SessionBloc, SessionState>(
       listener: (context, state) {
         if (_navigated) return;
 
@@ -34,21 +27,20 @@ class _SplashPageState extends State<SplashPage> {
           });
         }
 
-        if (state is AuthSucess) {
+        if (state is SessionAuthenticated) {
           navigateAfterDelay('/summary');
-        } else if (state is AuthInital || state is AuthFailure) {
+        } else if (state is SessionUnauthenticated) {
           navigateAfterDelay('/login');
         }
       },
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              FlutterLogo(size: 80), // Replace with your logo asset later
-              SizedBox(height: 24),
-              CircularProgressIndicator(),
+            children: [
+              Image.asset('lib/assets/logo_wrapd.png', width: 240, height: 240),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(color: Color(0xFF7A63BB)),
             ],
           ),
         ),

@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:get_it/get_it.dart';
+import 'package:wrapd/app/theme/app_colors.dart';
 import 'package:wrapd/features/auth/domain/usecases/get_login_url.dart';
 import 'package:wrapd/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:wrapd/features/auth/presentation/bloc/auth_event.dart';
 import 'package:wrapd/features/auth/presentation/bloc/auth_state.dart';
-import 'package:get_it/get_it.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,11 +22,15 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final AppLinks _appLinks = AppLinks();
   bool _hasNavigated = false;
+  String _version = '';
+
 
   @override
   void initState() {
     super.initState();
     _listenToAppLinks();
+    _loadVersion();
+
   }
 
   void _listenToAppLinks() {
@@ -36,6 +43,13 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  void _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = 'v${info.version}';
+    });
+  }
+
   void _launchGitHubLogin() {
     final loginUrl = GetIt.I<GetLoginUrl>()();
     launchUrl(Uri.parse(loginUrl), mode: LaunchMode.externalApplication);
@@ -43,6 +57,58 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    void _showHelpSheet(BuildContext context) {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: colors.brandPrimary,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  "Wrapd will only access public contributions of your GitHub profile.",
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: () async {
+                    const url =
+                        'https://docs.github.com/en/rest/permissions'; // update with your actual link
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      launchUrl(
+                        Uri.parse(url),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    }
+                  },
+                  child: const Text(
+                    "View GitHub permissions",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  "developed by devpedrofurquim",
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -60,26 +126,59 @@ class _LoginPageState extends State<LoginPage> {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      '👋 Welcome to Wrapd',
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                    Image.asset(
+                      'lib/assets/logo_wrapd.png',
+                      width: 240,
+                      height: 240,
                     ),
+
                     const SizedBox(height: 16),
-                    const Text(
-                      'Your GitHub year, beautifully wrapped.\nLogin to get started.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 32),
+
+                    // Continue with GitHub button or loader
                     if (state is AuthLoading)
                       const CircularProgressIndicator()
                     else
-                      ElevatedButton.icon(
+                      ElevatedButton(
                         onPressed: _launchGitHubLogin,
-                        icon: const Icon(Icons.login),
-                        label: const Text('Continue with GitHub'),
-                        style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                          backgroundColor: colors.brandPrimary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text("Continue with Github"),
                       ),
+
+                    const SizedBox(height: 24),
+
+                    // Tagline
+                    const Text(
+                      "Code matters. Let's unwrap it.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
+
+                    const SizedBox(height: 64),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(_version, style: const TextStyle(fontSize: 12)),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: Icon(
+                            Icons.help,
+                            size: 20,
+                            color: colors.brandPrimary,
+                          ),
+                          onPressed: () {
+                            _showHelpSheet(context);
+                          },
+                        ),
+                      ],
+                    ),
                     if (state is AuthFailure) ...[
                       const SizedBox(height: 16),
                       Text(
@@ -87,10 +186,6 @@ class _LoginPageState extends State<LoginPage> {
                         style: const TextStyle(color: Colors.red),
                         textAlign: TextAlign.center,
                       ),
-                    ],
-                    if (state is AuthSucess) ...[
-                      const SizedBox(height: 16),
-                      const Text('✅ Logged in successfully!'),
                     ],
                   ],
                 );

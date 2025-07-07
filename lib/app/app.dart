@@ -4,6 +4,8 @@ import 'package:get_it/get_it.dart';
 import 'package:wrapd/app/router.dart';
 import 'package:wrapd/app/theme/app_theme.dart';
 import 'package:wrapd/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:wrapd/core/session/presentation/bloc/session_bloc.dart';
+import 'package:wrapd/core/session/presentation/bloc/session_event.dart';
 
 class WrapdApp extends StatelessWidget {
   const WrapdApp({super.key});
@@ -12,17 +14,18 @@ class WrapdApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<SessionBloc>(
+          create: (_) => GetIt.I<SessionBloc>()..add(SessionStarted()),
+        ),
         BlocProvider<AuthBloc>(
           create: (_) => GetIt.I<AuthBloc>(),
         ),
-        // Add other blocs here:
-        // BlocProvider<OtherBloc>(create: (_) => GetIt.I<OtherBloc>()),
+        // Remove the duplicate AuthBloc provider
       ],
       child: MaterialApp.router(
         title: 'Wrapd',
         theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system,
+        themeMode: ThemeMode.light,
         routerConfig: appRouter,
         debugShowCheckedModeBanner: false,
       ),

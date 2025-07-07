@@ -1,0 +1,11 @@
+flutter_launcher_icons:
+  image_path: lib/assets/logo_wrapd.png
+  android: true
+  ios: true
+
+  # Android adaptive icon tweaks (optional)
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: lib/assets/logo_wrapd.png
+
+  # iOS 18 optional dark/tinted variants
+  # image_path_ios_dark_transparent: assets/icon_dark.png
