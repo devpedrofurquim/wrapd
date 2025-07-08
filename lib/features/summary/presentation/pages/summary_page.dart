@@ -116,11 +116,6 @@ class _SummaryViewState extends State<_SummaryView> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: colors.brandPrimary,
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
