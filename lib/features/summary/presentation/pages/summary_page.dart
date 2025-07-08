@@ -74,9 +74,9 @@ class _SummaryViewState extends State<_SummaryView> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
-                                    "Here's your 2024 GitHub Wrapd",
+                                    "Share your 2024 GitHub Wrapd",
                                     style: textTheme.bodySmall?.copyWith(
-                                      color: colors.textSecondary,
+                                      color: colors.brandPrimary,
                                     ),
                                   ),
                                 ],
@@ -86,11 +86,28 @@ class _SummaryViewState extends State<_SummaryView> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Image.asset('lib/assets/logo_wrapd.png', height: 32),
+                      TextButton.icon(
+                        onPressed: () {
+                          // TODO: Navigate to story features
+                          // Your button action here
+                        },
+                        icon: const Icon(
+                          Icons.navigate_next_sharp,
+                          size: 32,
+                        ), // <-- wrapped in Icon()
+                        label: const Text(''),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          foregroundColor: colors
+                              .brandPrimary, // 👈 change icon and text color here
+                        ),
+                      )
                     ],
                   ),
                   const SizedBox(height: 32),
-                  
                   // Content
                   Expanded(child: _buildContent(context, state)),
                 ],
@@ -142,14 +159,15 @@ class _SummaryViewState extends State<_SummaryView> {
   }
 
   Widget _buildContent(BuildContext context, SummaryState state) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+
     if (state is SummaryLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading your GitHub data...'),
+            CircularProgressIndicator(color: colors.brandPrimary),
+            const SizedBox(height: 16),
           ],
         ),
       );
@@ -158,9 +176,9 @@ class _SummaryViewState extends State<_SummaryView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            Icon(Icons.error_outline, size: 64, color: colors.brandPrimary),
             const SizedBox(height: 16),
-            Text('Error: ${state.message}'),
+            Text('An error ocurred :('),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
@@ -171,7 +189,7 @@ class _SummaryViewState extends State<_SummaryView> {
                   );
                 }
               },
-              child: const Text('Retry'),
+              child: const Text('Try again'),
             ),
           ],
         ),
@@ -184,64 +202,103 @@ class _SummaryViewState extends State<_SummaryView> {
   }
 
   Widget _buildUserContent(BuildContext context, SummaryLoaded state) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+
     return ListView(
       children: [
-        // User info card
         Card(
+          color: colors.surfaceCard,
+          surfaceTintColor: colors.brandPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: Column(
               children: [
-                if (state.user.avatarUrl != null)
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundImage: NetworkImage(state.user.avatarUrl!),
-                  )
-                else
-                  const CircleAvatar(radius: 24, child: Icon(Icons.person)),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        state.user.name.isNotEmpty
-                            ? state.user.name
-                            : state.user.login,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            state.user.name.isNotEmpty
+                                ? state.user.name
+                                : state.user.login,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          Text(
+                            '@${state.user.login}',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                          if (state.user.company != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.business, size: 16),
+                                const SizedBox(width: 4),
+                                Text(
+                                  state.user.company!,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (state.user.location != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on, size: 16),
+                                const SizedBox(width: 4),
+                                Text(
+                                  state.user.location!,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
                       ),
-                      Text('@${state.user.login}'),
-                      if (state.user.bio != null &&
-                          state.user.bio!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          state.user.bio!,
-                          style: const TextStyle(fontSize: 12),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+                if (state.user.bio != null && state.user.bio!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    state.user.bio!,
+                    style: const TextStyle(fontSize: 14),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                if (state.user.createdAt != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    'GitHub member since ${state.user.createdAt!.year} • ${state.user.yearsOnGitHub} years on GitHub',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
               ],
             ),
           ),
         ),
         const SizedBox(height: 16),
 
-        // GitHub stats
-        ..._buildGitHubStats(context, state.user),
+        // Enhanced GitHub stats
+        ..._buildEnhancedGitHubStats(context, state.user),
       ],
     );
   }
 
-  List<Widget> _buildGitHubStats(BuildContext context, user) {
-    final textTheme = Theme.of(context).textTheme;
-
+  List<Widget> _buildEnhancedGitHubStats(BuildContext context, user) {
     return [
       _buildStatCard(
         context,
@@ -261,12 +318,34 @@ class _SummaryViewState extends State<_SummaryView> {
         value: '${user.following}',
         icon: Icons.person_add_outlined,
       ),
-      _buildStatCard(
-        context,
-        title: 'Profile',
-        value: '@${user.login}',
-        icon: Icons.account_circle_outlined,
-      ),
+      if (user.email != null)
+        _buildStatCard(
+          context,
+          title: 'Email',
+          value: user.email!,
+          icon: Icons.email_outlined,
+        ),
+      if (user.blog != null && user.blog!.isNotEmpty)
+        _buildStatCard(
+          context,
+          title: 'Website',
+          value: user.blog!,
+          icon: Icons.web_outlined,
+        ),
+      if (user.twitterUsername != null)
+        _buildStatCard(
+          context,
+          title: 'Twitter',
+          value: '@${user.twitterUsername!}',
+          icon: Icons.alternate_email,
+        ),
+      if (user.createdAt != null)
+        _buildStatCard(
+          context,
+          title: 'Years on GitHub',
+          value: '${user.yearsOnGitHub} years',
+          icon: Icons.calendar_today_outlined,
+        ),
     ];
   }
 
